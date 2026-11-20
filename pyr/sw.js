@@ -1,6 +1,6 @@
 
 const prefix = 'pyramid:' + self.registration.scope + ':';
-const cacheName = prefix + '0e14688767f0';
+const cacheName = prefix + '5af60c269cdb';
 const home = new URL('./',self.registration.scope).href;
 self.addEventListener('install',event => {
   event.waitUntil(caches.open(cacheName).then(cache =>

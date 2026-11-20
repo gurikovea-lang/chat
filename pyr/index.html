@@ -123,6 +123,35 @@ a.text-link{font:inherit;border:0;padding:0;text-decoration:underline;background
 .plan-scale{display:grid;grid-template-columns:1fr auto;gap:5px 10px;align-items:center;margin-top:12px}
 .plan-scale output{font-size:.84rem;font-variant-numeric:tabular-nums;color:var(--green)}
 .plan-scale input,.plan-scale p{grid-column:1/-1}
+.triangle-sides{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:6px 0}
+.triangle-sides input{min-width:0}
+#triangle-inputs button{width:100%;margin:4px 0}
+#triangle-inputs p{margin-top:6px}
+.plane-angle-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,175px),1fr));gap:6px;margin-top:8px}
+.plane-angle-grid>div{display:grid;grid-template-columns:1fr auto;gap:4px 8px;background:var(--paper);border-radius:6px;padding:7px;font-size:.8rem}
+.plane-angle-grid small{grid-column:1/-1;color:var(--muted)}
+.header-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.header-actions button{font-size:.85rem}
+.input-details{border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-width:0}
+.input-details summary{cursor:pointer;font-size:.88rem;font-weight:700;color:var(--green)}
+.input-details[open] summary{margin-bottom:10px}
+.input-details>label,.input-details>p,.input-details>button{margin-top:8px}
+form{gap:10px}
+.work-status{padding:10px 14px;margin:0 0 15px;border:1px solid #6a9d7b;border-left:5px solid #39754b;background:#e2efdf;border-radius:8px;font-size:.88rem}
+.work-status.danger{border-color:#b7492a;background:#fce6da;color:#7b2813;font-weight:650}
+#edit-limit{border:2px solid #b7492a;border-left-width:5px;background:#fce6da;color:#7b2813}
+#edit-limit ul{margin:6px 0 0;padding-left:18px}
+#plan.outside-range{outline:2px solid #b7492a;outline-offset:2px}
+input[aria-invalid=true]{border-color:#b7492a!important;background:#fff1e9!important}
+dialog{width:min(620px,calc(100% - 28px));max-height:85vh;overflow:auto;padding:22px;border:1px solid var(--line);border-radius:14px;color:var(--ink,#182b28);background:var(--paper)}
+dialog::backdrop{background:#122d2266}
+dialog li{margin:9px 0}
+dialog p{margin-top:9px;font-size:.9rem}
+dialog h3{margin-top:17px}
+#manual-saw{margin-top:12px}
+@media print{#work-status,#help-dialog{display:none!important}}
+.live-angle-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,135px),1fr))}
+#show-manual-saw{font-size:.78rem;padding:5px 8px;width:100%}
 
 .print-only{display:none}
 @media print{
@@ -139,6 +168,8 @@ a.text-link{font:inherit;border:0;padding:0;text-decoration:underline;background
   .panels{display:block}
   .panel{padding:10px;margin:10px 0;break-inside:avoid}
   .panel svg{max-height:98px}
+  #results>section.range-guide{font-size:9px;line-height:1.25;padding:6px;break-inside:avoid}
+  #results>section.range-guide p{margin-top:3px}
   .saw-strip{grid-template-columns:repeat(3,minmax(0,1fr))}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
@@ -154,8 +185,25 @@ a.text-link{font:inherit;border:0;padding:0;text-decoration:underline;background
 <header>
   <div class="eyebrow">Калькулятор раскроя фанеры</div>
   <h1>Пирамида для скалодрома</h1>
-  <p>Задайте основание и высоту, затем перетащите вершину на плане.</p>
+  <div class="header-actions"><p>Задайте размеры → проверьте резы → скачайте чертёж.</p><button id="open-help" type="button">Как пользоваться</button></div>
 <p id="offline-status" class="hint" role="status" hidden></p></header>
+<aside id="work-status" class="work-status" role="status" hidden></aside>
+<dialog id="help-dialog" aria-labelledby="help-title">
+  <div class="section-head"><h2 id="help-title">Как пользоваться калькулятором</h2><button id="close-help" type="button" autofocus>Закрыть</button></div>
+  <ol>
+    <li>Выберите заготовку или число сторон от 3 до 6. Задайте площадь либо длины сторон и диагоналей. Для длин нажмите «Применить размеры основания».</li>
+    <li>Введите высоту от стены и толщину фанеры. На плане круг двигает вершину, квадраты — углы, ромбы — стороны. Масштаб основания меняет все стороны при той же высоте.</li>
+    <li>Укажите максимальный наклон вашей пилы. При 0° диск стоит перпендикулярно листу. Выберите точный расчёт или шаг 10°.</li>
+    <li>Выберите грань. AB находится у стены, AC и BC стыкуются с соседними гранями. Ручной наклон можно задать для каждой кромки. Общий стык получает одинаковую настройку на обеих деталях.</li>
+    <li>Проверьте предупреждения, 3D и предпросмотр раскроя. Скачайте Word или PDF, проверьте резы на обрезке той же фанеры.</li>
+  </ol>
+  <h3>Рабочие диапазоны</h3>
+  <p>В режиме с подсказками площадь от 0,0001 до 100 м², высота от 1 до 10 000 мм, фанера от 0,1 до 100 мм. Наклон пилы задаётся в пределах 0–89° и должен соответствовать возможностям инструмента.</p>
+  <p>Свободное планирование допускает положительные размеры за этими пределами. Основание должно оставаться выпуклым, вершина — над его внутренней областью. Слишком большие отношения размеров могут превысить точность расчёта.</p>
+  <p>Пунктиры показывают размеры правильного основания и зону вершины по скосам у стены. Расчётные диапазоны учитывают высоту и толщину. Дополнительную подгонку у вершины и ограничения пилы проверяйте по предупреждениям.</p>
+  <p>Звёздочка отмечает отличие выбранного наклона от расчётного. Увеличенный скос снимает дополнительный материал, поэтому его следует проверить до раскроя деталей.</p>
+  <p>Калькулятор рассчитывает геометрию. Прочность рельефа и его крепление согласуйте с ответственным за скалодром.</p>
+</dialog>
 <section class="workspace" aria-label="Параметры и план">
   <form id="parameters" autocomplete="off">
     <h2>Размеры</h2><input type="hidden" name="footprint" value="">
@@ -165,13 +213,8 @@ a.text-link{font:inherit;border:0;padding:0;text-decoration:underline;background
     </select></label>
     <label>Типовой размер<select id="preset">
       <option value="">Выбрать заготовку</option>
-      <option value="4,400,200">Квадрат · сторона 400 мм, высота 200 мм</option>
-      <option value="4,600,300">Квадрат · сторона 600 мм, высота 300 мм</option>
-      <option value="4,800,400">Квадрат · сторона 800 мм, высота 400 мм</option>
-      <option value="3,450,130">Треугольник · сторона 450 мм, высота 130 мм</option>
-      <option value="5,450,310">Пятиугольник · сторона 450 мм, высота 310 мм</option>
-      <option value="6,350,305">Шестиугольник · сторона 350 мм, высота 305 мм</option>
     </select></label>
+    <p id="preset-note" class="hint" hidden></p>
     <label id="side-label">Сторона правильного основания, мм<input id="regular-side" inputmode="decimal" value="600"></label>
     <p class="hint" id="side-hint">При изменении стороны высота меняется пропорционально, сохраняя углы.</p>
     <label>Площадь основания, м²<input name="area" inputmode="decimal" value="0,36" required></label>
@@ -181,15 +224,37 @@ a.text-link{font:inherit;border:0;padding:0;text-decoration:underline;background
       <label><input type="radio" name="count" value="5"><span>5</span></label>
       <label><input type="radio" name="count" value="6"><span>6</span></label>
     </div></fieldset>
+    <details class="input-details"><summary>Точные стороны и диагонали</summary>
+    <fieldset id="triangle-inputs">
+      <legend>Основание по сторонам и диагоналям</legend>
+      <div id="base-sides" class="triangle-sides"></div>
+      <div id="base-diagonals" class="triangle-sides"></div>
+      <button id="apply-triangle" type="button">Применить размеры основания</button>
+      <p id="triangle-error" class="over" role="alert" hidden></p>
+      <p id="triangle-summary" class="hint"></p>
+      <p class="hint">Для треугольника достаточно трёх сторон. У многоугольника диагонали от точки 1 фиксируют форму. X и Y отсчитываются от центра тяжести построенного основания.</p>
+    </fieldset>
+    </details>
     <label>Высота от стены, мм<input name="height" inputmode="decimal" value="300" required></label>
     <input id="height-slider" type="range" min="1" max="600" value="300" aria-label="Высота от стены в миллиметрах">
     <label>Фанера, мм<input name="thickness" inputmode="decimal" value="18" required></label>
+    <details class="input-details"><summary>Смещение вершины</summary>
     <div class="pair">
       <label>Смещение X, мм<input name="shift_x" inputmode="decimal" value="0" required></label>
       <label>Смещение Y, мм<input name="shift_y" inputmode="decimal" value="0" required></label>
     </div>
     <p class="hint">X и Y задают положение вершины на плане в мм от исходного центра основания. X вправо, Y вверх. При перетаскивании числа меняются сами.</p>
     <button type="button" id="center">Вернуть вершину в центр</button>
+    </details>
+    <details class="input-details" open><summary>Моя пила</summary>
+    <label>Углы для пилы<select name="cut_mode">
+      <option value="exact">Точный расчёт</option>
+      <option value="stepped" selected>Шаг 10° с припуском</option>
+    </select></label>
+    <label>Максимальный наклон, °<input name="saw_limit" inputmode="decimal" value="45" required></label>
+    <p class="hint">Предел берите из инструкции к своей пиле.</p>
+    </details>
+    <input type="hidden" name="saw_overrides" value="{}">
     <button type="button" id="reset">Сделать основание правильным</button>
     <button type="button" id="reset-dimensions">Сбросить размеры</button>
   </form>
@@ -215,10 +280,17 @@ a.text-link{font:inherit;border:0;padding:0;text-decoration:underline;background
     </svg>
     <div id="range-key" class="range-key" hidden></div>
     <section id="live-angles" class="range-guide" aria-label="Углы в реальном времени" hidden>
-      <h3>Настройки пилы по граням</h3>
+      <h3>Наклон диска по граням</h3>
       <div id="live-angle-grid" class="live-angle-grid"></div>
-      <p class="hint">Г1, Г2 и далее — номера граней на плане. Выберите грань, чтобы увидеть A, B и C. Наклон диска с шагом 10°. Звёздочка — припуск для подгонки.</p>
+      <button id="show-manual-saw" type="button">Ручной наклон для выбранной грани</button>
+      <p class="hint">Г1, Г2 и далее — номера граней на плане. Выберите грань, чтобы увидеть A, B и C. При 0° диск перпендикулярен листу. В режиме шага 10° звёздочка обозначает припуск для подгонки.</p>
     </section>
+    <details class="range-guide"><summary>Углы между плоскостями</summary><section id="plane-angles" hidden>
+      <h3>Внутренние углы между плоскостями</h3>
+      <div id="plane-angle-grid" class="plane-angle-grid"></div>
+      <p class="hint">Угол внутри пирамиды вдоль ребра. Для стыка двух одинаково скошенных листов наклон диска равен (180° − угол стыка) / 2. Кромка у стены вычисляется отдельно.</p>
+    </section>
+    </details>
     <p id="edit-limit" class="notice" role="status" hidden></p>
     <section id="range-guide" class="range-guide" aria-label="Диапазоны размеров" hidden></section>
     <section id="shape-variants" class="range-guide" aria-label="Типовые формы" hidden></section>
@@ -233,13 +305,23 @@ a.text-link{font:inherit;border:0;padding:0;text-decoration:underline;background
   <div class="face-picker" id="face-picker" aria-label="Грани модели"></div>
   <p id="face-detail" class="face-detail" aria-live="polite"></p>
   <div id="face-drawing" class="face-drawing"></div>
+  <details id="manual-saw" class="input-details"><summary>Задать наклон пилы вручную</summary>
+    <p id="manual-face" class="hint"></p>
+    <div class="triangle-sides">
+      <label>AB, °<input id="manual-ab" inputmode="decimal"></label>
+      <label>AC, °<input id="manual-ac" inputmode="decimal"></label>
+      <label>BC, °<input id="manual-bc" inputmode="decimal"></label>
+    </div>
+    <div class="plan-actions"><button id="apply-saw" type="button">Применить наклоны</button><button id="reset-saw" type="button">Вернуть расчётные</button></div>
+    <p id="manual-error" class="over" role="alert" hidden></p>
+  </details>
 </section>
 <section id="results">
   <div class="section-head result-head">
     <div><h2>Предпросмотр раскроя</h2><p id="summary"></p></div>
     <div class="exports"><a id="pdf" class="primary">Печать / PDF</a><a id="docx">Скачать Word</a></div>
   </div>
-  <p class="hint">Размеры даны по внешней стороне листа. При скосе диск уходит под деталь. Наклоны диска идут с шагом 10° до 40°. При 0° диск стоит под 90° к листу. Пропил ведут со стороны отхода.</p>
+  <p class="hint">Размеры даны по внешней стороне листа. При скосе диск уходит под деталь. Настройки диска соответствуют выбранному режиму расчёта. При 0° диск стоит под 90° к листу. Пропил ведут со стороны отхода.</p>
   <p id="fit-note" class="notice" hidden></p>
   <p class="hint">Схемы под деталями показывают рез поперёк кромки. Наружная сторона листа сверху, синяя линия — диск.</p>
   <p id="print-parameters" class="print-only"></p>
@@ -23487,18 +23569,21 @@ function renderPreview() {
       <div class="drawing-measures">
         <table><thead><tr><th>Кромка</th><th>Длина, мм</th><th>Наклон диска</th></tr></thead>
         <tbody>${edges.map(([edge,length],i) => `<tr><td>${edge}</td><td>${sizeText.format(length)}</td>
-          <td>${face.saw_settings[i]}°${face.fit_needed[i] ? ' *' : ''}</td></tr>`).join('')}</tbody></table>
-        ${face.fit_needed.some(Boolean) ? '<p class="hint">* На отмеченных кромках оставлен припуск для подгонки.</p>' : ''}
+          <td>${sizeText.format(face.saw_settings[i])}°${face.fit_needed[i] ? ' *' : ''}</td></tr>`).join('')}</tbody></table>
+        ${face.fit_needed.some(Boolean) ? '<p class="hint">* Настройка отличается от расчётной. Проверьте стык на обрезке.</p>' : ''}
         <p class="hint">Высота треугольника от AB до C · ${sizeText.format(face.rise)} мм<br>
-          От A до проекции C вдоль AB · ${sizeText.format(face.x)} мм</p>
+          От A до проекции C вдоль AB · ${sizeText.format(face.x)} мм<br>
+          Внутренний стык AC / BC · ${sizeText.format(180-2*face.bevels[1])}° / ${sizeText.format(180-2*face.bevels[2])}°</p>
       </div><div class="selected-saw">${group.saw_svg}</div>`;
   }
+  syncSawEditor();
   for (const button of facePicker.children) {
     button.setAttribute('aria-pressed', Number(button.dataset.face) === selectedFace);
   }
 }
 
 function selectPreviewFace(index) {
+  manualDirty = false;
   selectedFace = index;
   renderPreview();
   drawPlan();
@@ -23572,7 +23657,7 @@ const portable = (() => {
   function saw(face) {
     return '<div class="saw-strip">' + face.saw_settings.map((setting,i) => {
       const offset = Math.tan(setting*Math.PI/180);
-      const title = `${['AB','AC','BC'][i]} · ${setting}°${face.fit_needed[i] ? ' *' : ''}`;
+      const title = `${['AB','AC','BC'][i]} · ${mm.format(setting)}°${face.fit_needed[i] ? ' *' : ''}`;
       return `<svg viewBox="0 0 150 55" role="img" aria-label="${title}" xmlns="http://www.w3.org/2000/svg">
         <g font-size="11" font-family="Arial" text-anchor="middle" fill="#182b28">
           <rect x="7" y="26" width="136" height="17" fill="#efdfc6"/>
@@ -23590,7 +23675,15 @@ const portable = (() => {
     const height = num('height'), count = num('count'), thickness = num('thickness');
     const shift_x = num('shift_x'), shift_y = num('shift_y');
     const free = query.get('mode') === 'free';
-    const saw_limit = 45;
+    const saw_limit = query.has('saw_limit') ? num('saw_limit') : 45;
+    if (!Number.isFinite(saw_limit) || saw_limit<0 || saw_limit>89) throw new Error('Предел пилы должен быть от 0 до 89°.');
+    const overrides = JSON.parse(query.get('saw_overrides') || '{}');
+    const keys = Array.from({length:count},(_,i)=>['wall:'+(i+1),'rib:'+(i+1)]).flat();
+    if (!overrides || typeof overrides!=='object' || Array.isArray(overrides) ||
+        Object.entries(overrides).some(([k,v])=>!keys.includes(k) || typeof v!=='number' || !Number.isFinite(v) || v<0 || v>89)) {
+      throw new Error('Ручные наклоны должны быть числами от 0 до 89°.');
+    }
+    const exact = query.get("cut_mode") === "exact";
     if (![3,4,5,6].includes(count) || ![area,height,thickness,shift_x,shift_y].every(Number.isFinite)) {
       throw new Error('Введите числовые размеры и выберите от 3 до 6 граней.');
     }
@@ -23631,7 +23724,10 @@ const portable = (() => {
         throw new Error('Разница размеров слишком велика для точного расчёта.');
       }
       const too_thick = thickness*[ab,ac,bc].reduce((total,v,k) => total+v*Math.tan(bevels[k]*Math.PI/180),0) >= ab*rise;
-      const saw_settings = bevels.map(v => 10*Math.min(4,Math.floor((v+1e-7)/10)));
+      const saw_settings = exact ? [...bevels] : bevels.map(v => 10*Math.min(Math.floor(saw_limit/10),Math.floor((v+1e-7)/10)));
+      ['wall:'+(i+1),'rib:'+(i+1),'rib:'+(j+1)].forEach((key,k)=>{
+        if (Object.hasOwn(overrides,key)) saw_settings[k] = overrides[key];
+      });
       return {i:i+1,j:j+1,ab,ac,bc,x,rise,bevels,too_thick,saw_settings,
         fit_needed:bevels.map((v,k) => Math.abs(v-saw_settings[k])>1e-7)};
     });
@@ -23642,16 +23738,19 @@ const portable = (() => {
     const inner = bc.map((v,i) => -thickness*(v+ca[i]+ab[i])/determinant);
     const apex_trim = normals.slice(3).some(n => Math.abs(dot(n,inner)+thickness)>1e-6);
     const notes = [];
-    if (faces.some(f => f.bevels.some(v => v>45+1e-8))) notes.push('Скосы выше предела пилы 45°.');
+    if (faces.some(f => f.bevels.some(v => v>saw_limit+1e-8))) notes.push('Скосы выше предела пилы '+mm.format(saw_limit)+'°.');
+    if (faces.some(f=>f.saw_settings.some(v=>v>saw_limit+1e-8))) notes.push('Выбранная настройка диска превышает предел вашей пилы.');
+    if (faces.some(f=>f.saw_settings.some((v,i)=>v>f.bevels[i]+1e-7))) notes.push('Ручной наклон превышает расчётный и снимет лишний материал на стыке.');
     const thick = faces.filter(f=>f.too_thick).map(f=>f.i);
     if (thick.length) notes.push('Скосы перекрываются на гранях '+thick.join(', ')+'. Уменьшите толщину фанеры.');
     if (apex_trim) notes.push('У вершины понадобится дополнительная подгонка. Для раскроя тремя резами на грань измените форму.');
-    const fit_note = faces.some(f=>f.fit_needed.some(Boolean)) ? '* На отмеченных кромках оставлен припуск для подгонки.' : '';
+    const fit_note = faces.some(f=>f.fit_needed.some(Boolean)) ? '* Наклон отличается от расчётного. Проверьте стык на обрезке.' : '';
     const groups = [];
     for (const f of faces) {
       const match = groups.find(({face:g}) =>
         ['ab','ac','bc'].every(k=>Math.abs(f[k]-g[k])<1e-7) &&
-        f.bevels.every((v,i)=>Math.abs(v-g.bevels[i])<1e-7));
+        f.bevels.every((v,i)=>Math.abs(v-g.bevels[i])<1e-7) &&
+        f.saw_settings.every((v,i)=>Math.abs(v-g.saw_settings[i])<1e-7));
       const edge = f.i+'→'+f.j;
       if (match) match.edges.push(edge);
       else groups.push({face:f,edges:[edge]});
@@ -23662,7 +23761,7 @@ const portable = (() => {
       group.svg = panel(group.face,group.title);
       group.saw_svg = saw(group.face);
     });
-    return {free,area,height,count,thickness,shift_x,shift_y,saw_limit,base,faces,groups,notes,fit_note};
+    return {saw_overrides:overrides,exact,free,area,height,count,thickness,shift_x,shift_y,saw_limit,base,faces,groups,notes,fit_note};
   }
 
   function png(svg,width,height) {
@@ -23701,15 +23800,17 @@ const portable = (() => {
     planStyles.textContent = '.edge-dimension,.plan-letter,.plan-face-name{font:700 12px Arial;text-anchor:middle;fill:#18352c;paint-order:stroke;stroke:white;stroke-width:3}.plan-overlays,.edge-grip,.corner-grip{display:none}.plan-picked{fill:#f4dcba;fill-opacity:.48}.knob{fill:#a14520}';
     planCopy.prepend(planStyles);
     children.push(new Paragraph({children:[await png(planCopy,330,240)]}));
-    for (const group of model.groups) {
-      children.push(heading(group.title,HeadingLevel.HEADING_1),p(group.mapping));
+    for (const [index,group] of model.groups.entries()) {
+      children.push(new Paragraph({text:group.title,heading:HeadingLevel.HEADING_1,
+        pageBreakBefore:index>0,keepNext:true}),p(group.mapping));
       const template=document.createElement('template');
       template.innerHTML=group.svg+group.saw_svg;
       const [outline,...schemes]=template.content.querySelectorAll('svg');
       children.push(new Paragraph({children:[await png(outline,270,144)]}));
       const {face:f}=group;
+      children.push(p(`Углы стыков AC / BC · ${mm.format(180-2*f.bevels[1])}° / ${mm.format(180-2*f.bevels[2])}°`));
       const rows=[['Кромка','Длина, мм','Наклон диска'], ...edgeNames.map((edge,i)=>
-        [edge,mm.format([f.ab,f.ac,f.bc][i]),f.saw_settings[i]+'°'+(f.fit_needed[i]?' *':'')])];
+        [edge,mm.format([f.ab,f.ac,f.bc][i]),mm.format(f.saw_settings[i])+'°'+(f.fit_needed[i]?' *':'')])];
       const columnWidths = [3100,2300,2700];
       children.push(new Table({
         width:{size:8100,type:WidthType.DXA}, layout:TableLayoutType.FIXED, columnWidths,
@@ -23790,6 +23891,12 @@ const sideLabel = document.querySelector('#side-label');
 const sideHint = document.querySelector('#side-hint');
 const editLimit = document.querySelector('#edit-limit');
 const rangeGuide = document.querySelector('#range-guide');
+let triangleDirty = false;
+const triangleInputs = document.querySelector('#triangle-inputs');
+const triangleSummary = document.querySelector('#triangle-summary');
+const triangleError = document.querySelector('#triangle-error');
+const planeAngles = document.querySelector('#plane-angles');
+const planeAngleGrid = document.querySelector('#plane-angle-grid');
 const liveAngles = document.querySelector('#live-angles');
 const rangeKey = document.querySelector('#range-key');
 const variantList = document.querySelector('#shape-variants');
@@ -23797,6 +23904,83 @@ let variantCount;
 let showPlanGuides = true;
 const guideToggle = document.querySelector('#toggle-guides');
 const angleGrid = document.querySelector('#live-angle-grid');
+const statusBox = document.querySelector('#work-status');
+const sawLimit = () => Number(field('saw_limit').value.replace(',','.'));
+const sawRadians = () => sawLimit()*Math.PI/180;
+let manualDirty = false;
+
+function showStatus(message, danger = false) {
+  statusBox.hidden = false;
+  statusBox.classList.toggle('danger',danger);
+  statusBox.textContent = message;
+}
+function showIssues(model) {
+  editLimit.hidden = !model.notes.length;
+  editLimit.replaceChildren();
+  if (model.notes.length) {
+    const title = document.createElement('strong');
+    title.textContent = 'Проверьте перед раскроем';
+    const list = document.createElement('ul');
+    model.notes.forEach(note=>{
+      const li=document.createElement('li');
+      li.textContent=note;
+      list.append(li);
+    });
+    editLimit.append(title,list);
+  }
+  showStatus(model.notes.length ? '⚠ Есть ограничения · '+model.notes[0] :
+    '✓ Расчёт готов · выберите грань и проверьте резы', Boolean(model.notes.length));
+  const exceeds=model.faces.some(f=>f.bevels.some(v=>v>model.saw_limit+1e-8));
+  field('saw_limit').setAttribute('aria-invalid',String(exceeds));
+  plan.classList.toggle('outside-range',Boolean(model.notes.length));
+}
+function syncSawEditor() {
+  if (!currentModel) return;
+  const f=currentModel.faces[selectedFace-1];
+  document.querySelector('#manual-face').textContent =
+    `Грань ${selectedFace}. Расчётные AB / AC / BC · ${f.bevels.map(v=>display(v)+'°').join(' / ')}. Предел пилы ${display(currentModel.saw_limit)}°.`;
+  if (!manualDirty) ['ab','ac','bc'].forEach((key,i)=>{
+    document.querySelector('#manual-'+key).value=String(Number(f.saw_settings[i].toFixed(4))).replace('.',',');
+  });
+}
+document.querySelector('#show-manual-saw').onclick=()=>{
+  const editor=document.querySelector('#manual-saw');
+  editor.open=true;
+  syncSawEditor();
+  editor.scrollIntoView({behavior:'smooth',block:'center'});
+};
+document.querySelector('#manual-saw').addEventListener('input',()=>{manualDirty=true;});
+document.querySelector('#apply-saw').onclick=()=>{
+  if (!currentModel) return;
+  const inputs=['ab','ac','bc'].map(key=>document.querySelector('#manual-'+key));
+  const values=inputs.map(input=>Number(input.value.replace(',','.')));
+  const error=document.querySelector('#manual-error');
+  const valid=values.every((v,i)=>inputs[i].value.trim() && Number.isFinite(v) && v>=0 && v<=89);
+  error.hidden=valid;
+  if (!valid) {error.textContent='Введите наклоны от 0 до 89°. Возможности пилы проверяются по её пределу.';return;}
+  const f=currentModel.faces[selectedFace-1];
+  const overrides=JSON.parse(field('saw_overrides').value);
+  ['wall:'+f.i,'rib:'+f.i,'rib:'+f.j].forEach((key,i)=>{overrides[key]=values[i];});
+  field('saw_overrides').value=JSON.stringify(overrides);
+  manualDirty=false;
+  refresh();
+  drawPlan();
+};
+document.querySelector('#reset-saw').onclick=()=>{
+  if (!currentModel) return;
+  const f=currentModel.faces[selectedFace-1];
+  const overrides=JSON.parse(field('saw_overrides').value);
+  ['wall:'+f.i,'rib:'+f.i,'rib:'+f.j].forEach(key=>delete overrides[key]);
+  field('saw_overrides').value=JSON.stringify(overrides);
+  document.querySelector('#manual-error').hidden=true;
+  manualDirty=false;
+  refresh();
+  drawPlan();
+};
+const helpDialog=document.querySelector('#help-dialog');
+document.querySelector('#open-help').onclick=()=>helpDialog.showModal();
+document.querySelector('#close-help').onclick=()=>helpDialog.close();
+
 const isFree = () => field('mode').value === 'free';
 const dragCoordinate = value => isFree() ? Number(value.toPrecision(12)) : Math.round(value*100)/100;
 const validArea = value => Number.isFinite(value) && (isFree() ? value > 0 : value >= .0001 && value <= 100);
@@ -23808,17 +23992,114 @@ const sideArea = (side,count) => count*side*side/(4e6*Math.tan(Math.PI/count));
 
 function syncControls() {
   const height = read('height');
+  if (footprint) set('area',Number(areaOf(footprint).toPrecision(8)));
   slider.max = isFree() ? Math.max(600, height) : Math.max(600, Math.min(10000, Math.ceil(height / 100) * 100));
   slider.min = isFree() ? 0 : 1;
   slider.step = isFree() ? 'any' : '1';
   slider.value = height;
   sideLabel.hidden = Boolean(footprint);
+  syncTriangle();
   sideHint.hidden = Boolean(footprint) || isFree();
   if (!footprint) {
     const side = Math.sqrt(read('area') / sideArea(1,read('count')));
     sideInput.value = String(Number(side.toPrecision(12))).replace('.', ',');
   }
 }
+
+function polygonCentroid(vertices) {
+  let twiceArea = 0, x = 0, y = 0;
+  vertices.forEach(([ax,ay],i) => {
+    const [bx,by] = vertices[(i+1)%vertices.length];
+    const weight = ax*by-bx*ay;
+    twiceArea += weight;
+    x += (ax+bx)*weight;
+    y += (ay+by)*weight;
+  });
+  return [x/(3*twiceArea),y/(3*twiceArea)];
+}
+
+function syncTriangle() {
+  const count = read('count');
+  const points = footprint || regularVertices(count, read('area'));
+  const distance = (i,j) => Math.hypot(points[i][0]-points[j][0],points[i][1]-points[j][1]);
+  const value = size => String(Number(size.toPrecision(12))).replace('.',',');
+  if (!triangleDirty || document.querySelectorAll('#base-sides input').length !== count) {
+    document.querySelector('#base-sides').innerHTML = points.map((_,i) =>
+      `<label>${'abcdef'[i]} · ${i+1}–${(i+1)%count+1}, мм<input id="triangle-${'abcdef'[i]}" inputmode="decimal" value="${value(distance(i,(i+1)%count))}"></label>`).join('');
+    document.querySelector('#base-diagonals').innerHTML = points.slice(2,-1).map((_,i)=>
+      `<label>1–${i+3}, мм<input id="diagonal-${i+3}" inputmode="decimal" value="${value(distance(0,i+2))}"></label>`).join('');
+  }
+  const angles = points.map((a,i) => {
+    const before = points[(i+count-1)%count], after = points[(i+1)%count];
+    const u = [before[0]-a[0],before[1]-a[1]], v = [after[0]-a[0],after[1]-a[1]];
+    return Math.acos(Math.max(-1,Math.min(1,(u[0]*v[0]+u[1]*v[1])/(Math.hypot(...u)*Math.hypot(...v)))))*180/Math.PI;
+  });
+  triangleSummary.textContent = `Углы основания в точках ${points.map((_,i)=>i+1).join(' / ')} · ${angles.map(v=>display(v)+'°').join(' / ')}. Площадь ${displayArea.format(areaOf(points))} м².`;
+}
+
+function applyTriangle() {
+  const count = read('count');
+  const number = id => Number(document.getElementById(id).value.replace(',','.'));
+  const sides = Array.from({length:count},(_,i)=>number('triangle-'+'abcdef'[i]));
+  const diagonals = Array.from({length:count-3},(_,i)=>number('diagonal-'+(i+3)));
+  const fail = message => {
+    triangleError.hidden = false;
+    triangleError.textContent = message;
+  };
+  if (![...sides,...diagonals].every(v=>Number.isFinite(v) && v>0)) {
+    fail('Все стороны и диагонали должны быть положительными числами.');
+    return;
+  }
+  const vertices = [[0,0],[sides[0],0]];
+  let angle = 0, previous = sides[0];
+  for (let i=2;i<count;i++) {
+    const radius = i===count-1 ? sides[count-1] : diagonals[i-2];
+    const edge = sides[i-1];
+    if (Math.max(previous,radius,edge)*2 >= previous+radius+edge) {
+      fail(`Размеры треугольника 1–${i}–${i+1} несовместимы. Проверьте стороны и диагонали.`);
+      return;
+    }
+    const cosine = (previous*previous+radius*radius-edge*edge)/(2*previous*radius);
+    angle += Math.acos(Math.max(-1,Math.min(1,cosine)));
+    vertices.push([radius*Math.cos(angle),radius*Math.sin(angle)]);
+    previous = radius;
+  }
+  if (vertices.some((a,i)=>vertices.some((q,j)=>j!==i && j!==(i+1)%count &&
+      cross(a,vertices[(i+1)%count],q)<=0))) {
+    fail('Эти размеры дают невыпуклый или пересекающийся контур. Проверьте диагонали.');
+    return;
+  }
+  const area = areaOf(vertices);
+  if (!validArea(area)) {
+    fail(isFree() ? 'Эти размеры дают вырожденное основание.' : 'Площадь должна быть от 0,0001 до 100 м². Для других размеров включите свободное планирование.');
+    return;
+  }
+  const center = polygonCentroid(vertices);
+  const centered = vertices.map(p=>[p[0]-center[0],p[1]-center[1]]);
+  if (centered.some((point,i)=>cross(point,centered[(i+1)%count],[read('shift_x'),read('shift_y')])<=0)) {
+    fail('Текущее смещение выводит вершину за новое основание. Верните вершину в центр и примените размеры.');
+    return;
+  }
+  if (!isFree() && centered.flat().some(v=>Math.abs(v)>30000)) {
+    fail('Координаты основания превышают 30 000 мм. Включите свободное планирование.');
+    return;
+  }
+  saveFootprint(centered);
+  set('area',area);
+  triangleError.hidden = true;
+  document.querySelector('#preset-note').hidden = true;
+  refresh();
+  drawPlan();
+}
+
+triangleInputs.addEventListener('input', () => { triangleDirty = true; triangleError.hidden = true; });
+document.querySelector('#apply-triangle').onclick = applyTriangle;
+triangleInputs.addEventListener('keydown',event => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    applyTriangle();
+  }
+});
 
 function restoreAccepted(message) {
   if (accepted) {
@@ -23831,6 +24112,7 @@ function restoreAccepted(message) {
   }
   editLimit.hidden = false;
   editLimit.textContent = message;
+  showStatus('⚠ Изменение не применено · '+message,true);
 }
 let transform, polygon, drag, controller, scheduled, footprint;
 let revision = 0;
@@ -23843,6 +24125,7 @@ const midpoint = (a,b) => [(a[0]+b[0])/2,(a[1]+b[1])/2];
 const centerOf = vertices => vertices.reduce(([x,y], [u,v]) =>
   [x+u/vertices.length,y+v/vertices.length], [0,0]);
 const saveFootprint = vertices => {
+  triangleDirty = false;
   footprint = vertices;
   field('footprint').value = vertices ? JSON.stringify(vertices) : '';
 };
@@ -23878,11 +24161,12 @@ function regularVertices(count, area) {
 }
 
 function apexZone(vertices, height) {
+  const maximum = height*Math.tan(sawRadians());
   let region = vertices;
   for (const [i,a] of vertices.entries()) {
     const b = vertices[(i+1) % vertices.length];
     const edgeLength = Math.hypot(b[0]-a[0], b[1]-a[1]);
-    const distance = point => height - cross(a,b,point)/edgeLength;
+    const distance = point => maximum - cross(a,b,point)/edgeLength;
     region = region.flatMap((p,j) => {
       const q = region[(j+1)%region.length];
       const dp = distance(p), dq = distance(q);
@@ -23903,7 +24187,7 @@ const shapeNames = ['Треугольник','Квадрат','Пятиугол�
 function workingVariants(height, thickness) {
   return shapeNames.flatMap((name,i) => {
     const count = i+3;
-    const bounds = regularBounds(height,count,thickness,Math.PI/4);
+    const bounds = regularBounds(height,count,thickness,sawRadians());
     if (!bounds) return [];
     const standard = [450,600,450,350][i];
     const side = standard >= bounds.low && standard <= bounds.high ? standard :
@@ -23974,6 +24258,7 @@ function showRanges(model) {
 
 function showLiveAngles(vertices, [x,y], height) {
   liveAngles.hidden = true;
+  planeAngles.hidden = true;
   if (!(Number.isFinite(height) && height > 0)) return;
   const normals = vertices.map(([ax,ay], i) => {
     const [bx,by] = vertices[(i+1) % vertices.length];
@@ -23992,11 +24277,22 @@ function showLiveAngles(vertices, [x,y], height) {
   angleGrid.innerHTML = normals.map(({distance},i) => {
     const cut = [Math.atan2(distance,height)*degrees, joins[i], joins[(i+1)%normals.length]];
     return `<div><button type="button" data-plan-face="${i+1}" aria-pressed="${selectedFace === i+1}">Грань ${i+1}</button>${cut.map((angle,j) => {
-      const setting = Math.min(40,Math.floor((angle+1e-7)/10)*10);
-      return `<span>${['AB','AC','BC'][j]} <b>${setting}°${angle-setting > 1e-7 ? '*' : ''}</b></span>`;
+      const key = j===0 ? 'wall:'+(i+1) : 'rib:'+(j===1 ? i+1 : (i+1)%normals.length+1);
+      const overrides=JSON.parse(field('saw_overrides').value);
+      const setting = overrides[key] ?? (field('cut_mode').value === 'exact' ? angle :
+        Math.min(Math.floor(sawLimit()/10)*10,Math.floor((angle+1e-7)/10)*10));
+      return `<span>${['AB','AC','BC'][j]} <b>${display(setting)}°${Math.abs(angle-setting) > 1e-7 ? '*' : ''}</b></span>`;
     }).join('')}</div>`;
   }).join('');
   liveAngles.hidden = false;
+  planeAngleGrid.innerHTML = normals.map(({distance},i) => {
+    const wall = 90 - Math.atan2(distance,height)*degrees;
+    const interior = 180 - 2*joins[i];
+    const previous = (i+normals.length-1)%normals.length+1;
+    return `<div><strong>Г${previous}–Г${i+1} · ребро ${i+1}–C</strong><b>${display(interior)}°</b>
+      <small>Г${i+1}–стена · ребро ${i+1}–${(i+1)%normals.length+1} · ${display(wall)}°</small></div>`;
+  }).join('');
+  planeAngles.hidden = false;
 }
 
 function drawPlan() {
@@ -24005,6 +24301,7 @@ function drawPlan() {
   const step = Math.PI * 2 / count;
   if (!validArea(area)) {
     liveAngles.hidden = true;
+    planeAngles.hidden = true;
     transform = null;
     handle.style.display = 'none';
     document.querySelector('#outline').replaceChildren();
@@ -24020,7 +24317,7 @@ function drawPlan() {
   const choice = showPlanGuides && variants.find(v => v.count === variantCount);
   const reference = choice ? regularVertices(choice.count,sideArea(choice.side,choice.count)) :
     showPlanGuides && footprint ? regular : [];
-  const bounds = !showPlanGuides || isFree() ? null : regularBounds(height,count,thickness,Math.PI/4);
+  const bounds = !showPlanGuides || isFree() ? null : regularBounds(height,count,thickness,sawRadians());
   const zone = showPlanGuides && !isFree() && height > 0 ? apexZone(vertices,height) : [];
   const near = bounds ? regularVertices(count,sideArea(bounds.low,count)) : [];
   const far = bounds ? regularVertices(count,sideArea(bounds.high,count)) : [];
@@ -24170,6 +24467,8 @@ document.querySelector('#reset-plan-view').onclick = () => {
 document.querySelector('#reset-dimensions').onclick = () => {
   saveFootprint(null);
   variantCount = undefined;
+  field('saw_overrides').value='{}';
+  manualDirty=false;
   field('count').value = form.querySelector('input[name="count"][checked]').value;
   for (const name of ['area','height','thickness','shift_x','shift_y']) {
     field(name).value = field(name).defaultValue;
@@ -24228,7 +24527,11 @@ handle.addEventListener('keydown', event => {
        oy + scale * (-read('shift_y') + direction[1] * step));
 });
 
-function refresh(scaling = false) {
+function refresh(scaling = false, keepPreset = false) {
+  if (!keepPreset) {
+    document.querySelector('#preset-note').hidden = true;
+    preset.value = '';
+  }
   if (!scaling) resetOutlineScale();
   revision++;
   downloads.forEach(link => link.removeAttribute('href'));
@@ -24256,8 +24559,7 @@ async function update() {
     syncControls();
     setPreviewModel(model);
     drawPlan();
-    editLimit.hidden = !model.notes.length;
-    editLimit.textContent = model.notes.join(' ');
+    showIssues(model);
     errorBox.hidden = true;
     if (model.free) rangeGuide.hidden = true;
     else showRanges(model);
@@ -24272,8 +24574,9 @@ async function update() {
         <small>${group.mapping}</small>${dimensionedFace(group)}
         <table><thead><tr><th>Кромка</th><th>Длина, мм</th><th>Наклон диска</th></tr></thead><tbody>
         ${['AB · стена','AC · стык','BC · стык'].map((label,i) => `<tr><td>${label}</td>
-          <td>${display([f.ab,f.ac,f.bc][i])}</td><td class="${f.fit_needed[i] ? 'over' : ''}">${f.saw_settings[i]}°${f.fit_needed[i] ? ' *' : ''}</td></tr>`).join('')}
-        </tbody></table><p class="hint">Вершина C от A вдоль AB · ${display(f.x)} мм<br>Высота треугольника · ${display(f.rise)} мм</p>${group.saw_svg}</article>`;
+          <td>${display([f.ab,f.ac,f.bc][i])}</td><td class="${f.fit_needed[i] ? 'over' : ''}">${display(f.saw_settings[i])}°${f.fit_needed[i] ? ' *' : ''}</td></tr>`).join('')}
+        </tbody></table><p class="hint">Вершина C от A вдоль AB · ${display(f.x)} мм<br>Высота треугольника · ${display(f.rise)} мм<br>
+        Внутренний стык AC / BC · ${display(180-2*f.bevels[1])}° / ${display(180-2*f.bevels[2])}°</p>${group.saw_svg}</article>`;
     }).join('');
     if (typeof portable !== 'undefined') portable.exportLinks(model);
     else downloads.forEach(link => {link.href = '/' + link.id + '?' + query;});
@@ -24283,7 +24586,7 @@ async function update() {
       const height = read('height'), count = read('count'), thickness = read('thickness');
       const alternative = !footprint && height >= 1 && height <= 10000 &&
         thickness >= .1 && thickness <= 100 && !read('shift_x') && !read('shift_y')
-        ? ` При высоте ${display(height)} мм: ${regularRange(height,count,thickness,Math.PI/4)}` : '';
+        ? ` При высоте ${display(height)} мм: ${regularRange(height,count,thickness,sawRadians())}` : '';
       restoreAccepted('Размеры сохранены. ' + error.message + alternative);
       if (typeof portable !== 'undefined') portable.exportLinks(portable.calculate(accepted));
       else downloads.forEach(link => {link.href = '/' + link.id + '?' + accepted;});
@@ -24291,6 +24594,7 @@ async function update() {
     }
     errorBox.hidden = false;
     errorBox.textContent = error.message;
+    showStatus('⚠ Расчёт недоступен · '+error.message,true);
     setPreviewModel(null);
     rangeGuide.hidden = true;
     liveAngles.hidden = true;
@@ -24341,7 +24645,7 @@ slider.addEventListener('input', () => {
 
 form.addEventListener('input', event => {
   if (event.target === field('height') || event.target === field('shift_x') ||
-      event.target === field('shift_y') || (event.target === field('area') && !footprint)) {
+      event.target === field('shift_y') || event.target === field('cut_mode') || event.target === field('saw_limit') || (event.target === field('area') && !footprint)) {
     downloads.forEach(link => link.removeAttribute('href'));
     drawPlan();
   }
@@ -24350,7 +24654,12 @@ form.addEventListener('input', event => {
 form.addEventListener('change', event => {
   const name = event.target.name;
   if (!name) return;
+  document.querySelector('#preset-note').hidden = true;
+  preset.value = '';
+  triangleError.hidden = true;
   if (name === 'count') {
+    field('saw_overrides').value='{}';
+    manualDirty=false;
     saveFootprint(null);
     set('shift_x', 0);
     set('shift_y', 0);
@@ -24392,20 +24701,81 @@ sideInput.addEventListener('keydown', event => {
   }
 });
 
+const cataloguePresets = [
+  {id:'tr45-s',name:'TR 45 S · треугольник 480 × 420 × 144 мм',count:3,width:480,depth:420,height:144,
+    url:'https://skalodrom.ru/holds-and-volumes/volumes/tr-45-dt/',
+    note:'Габариты 480 × 420 × 144 мм и фанера 18 мм взяты из TR 45 S. Контур восстановлен как равнобедренный треугольник, вершина по центру тяжести.'},
+  {id:'flat3-s',name:'Flat 3 S · 460 × 405 × 67 мм',count:3,width:460,depth:405,height:67,
+    url:'https://skalodrom.ru/holds-and-volumes/volumes/flat-3/',
+    note:'Габариты 460 × 405 × 67 мм и фанера 18 мм из Flat 3 S. Модель использует равнобедренный контур по этим габаритам и вершину по центру тяжести.'},
+  {id:'flat3-m',name:'Flat 3 M · 710 × 620 × 101 мм',count:3,width:710,depth:620,height:101,
+    url:'https://skalodrom.ru/holds-and-volumes/volumes/flat-3/',
+    note:'Габариты 710 × 620 × 101 мм и фанера 18 мм из Flat 3 M. Контур восстановлен по габаритам как равнобедренный, вершина по центру тяжести.'},
+  {id:'flat4-s',name:'Flat 4 S · квадрат 375 × 375 × 87 мм',count:4,width:375,depth:375,height:87,
+    url:'https://skalodrom.ru/holds-and-volumes/volumes/flat-4/',
+    note:'Квадратное основание 375 × 375 мм, высота 87 мм и фанера 18 мм из Flat 4 S. Вершина модели размещена по центру.'},
+  {id:'flat4-m',name:'Flat 4 M · квадрат 500 × 500 × 117 мм',count:4,width:500,depth:500,height:117,
+    url:'https://skalodrom.ru/holds-and-volumes/volumes/flat-4/',
+    note:'Квадратное основание 500 × 500 мм, высота 117 мм и фанера 18 мм из Flat 4 M. Вершина модели размещена по центру.'},
+  {id:'flat5-s',name:'По габаритам Flat 5 S · 390 × 375 × 80 мм',count:5,width:390,depth:375,height:80,
+    url:'https://skalodrom.ru/holds-and-volumes/volumes/flat-5/',
+    note:'Габариты 390 × 375 × 80 мм и фанера 18 мм из Flat 5 S. Контур — растянутый правильный пятиугольник, вершина по центру тяжести. Форма и углы модели приближённые.'},
+  {id:'hex',name:'Шестиугольник · пример 600 × 520 × 150 мм',count:6,width:600,depth:520,height:150,
+    note:'Предложенная заготовка с шестью гранями и фанерой 18 мм. На странице Flat 6 описание формы и название расходятся, поэтому здесь заданы собственные размеры.'},
+  {id:'long-triangle',name:'Вытянутый треугольник · пример 900 × 300 × 150 мм',count:3,width:900,depth:300,height:150,dx:70,
+    note:'Предложенный пример вытянутого треугольного рельефа. Размеры и смещение вершины 70 мм подобраны для редактирования.'},
+  {id:'rectangle',name:'Прямоугольная пирамида · пример 800 × 400 × 200 мм',count:4,width:800,depth:400,height:200,
+    note:'Предложенная прямоугольная заготовка, фанера 18 мм, вершина по центру.'},
+  {id:'square',name:'Квадрат · базовый 600 × 600 × 300 мм',count:4,width:600,depth:600,height:300,
+    note:'Базовая заготовка калькулятора с фанерой 18 мм.'}
+];
+preset.innerHTML = '<option value="">Выбрать заготовку</option>' + cataloguePresets.map(p=>
+  `<option value="${p.id}">${p.name}</option>`).join('');
+
+function applyPreset(selected) {
+  field('saw_overrides').value='{}';
+  manualDirty=false;
+  let vertices;
+  if (selected.count===3) {
+    vertices = [[-selected.width/2,0],[selected.width/2,0],[0,selected.depth]];
+  } else {
+    vertices = regularVertices(selected.count,1);
+    const xs=vertices.map(p=>p[0]), ys=vertices.map(p=>p[1]);
+    const width=Math.max(...xs)-Math.min(...xs), depth=Math.max(...ys)-Math.min(...ys);
+    vertices = vertices.map(([x,y])=>[x*selected.width/width,y*selected.depth/depth]);
+  }
+  const center = polygonCentroid(vertices);
+  vertices = vertices.map(p=>[p[0]-center[0],p[1]-center[1]]);
+  saveFootprint(vertices);
+  field('count').value = String(selected.count);
+  set('area',areaOf(vertices));
+  set('height',selected.height);
+  set('thickness',18);
+  set('shift_x',selected.dx || 0);
+  set('shift_y',0);
+  const note = document.querySelector('#preset-note');
+  note.textContent = selected.note+' ';
+  if (selected.url) {
+    const link=document.createElement('a');
+    link.href=selected.url;
+    link.textContent='Карточка каталога';
+    link.className='text-link';
+    note.append(link);
+  }
+  note.hidden = false;
+  preset.value = selected.id;
+  triangleError.hidden = true;
+  variantCount = undefined;
+  refresh(false,true);
+  drawPlan();
+}
+
 preset.addEventListener('change', () => {
-  if (!preset.value) return;
-  const [count,side,height] = preset.value.split(',').map(Number);
-  preset.value = '';
-  saveFootprint(null);
-  field('count').value = String(count);
-  set('area', sideArea(side,count));
-  set('height', height);
-  set('shift_x', 0);
-  set('shift_y', 0);
-  refresh();
+  const selected = cataloguePresets.find(p=>p.id===preset.value);
+  if (selected) applyPreset(selected);
 });
 document.querySelector('#center').onclick = () => {
-  const [x,y] = footprint ? centerOf(footprint) : [0,0];
+  const [x,y] = footprint ? polygonCentroid(footprint) : [0,0];
   set('shift_x', Number(x.toFixed(6)));
   set('shift_y', Number(y.toFixed(6)));
   refresh();
