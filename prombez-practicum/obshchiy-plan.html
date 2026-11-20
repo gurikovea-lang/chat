@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Производственная площадка</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: #1e293b;
+      background: #fff;
+      font: 1rem/1.5 system-ui, sans-serif;
+    }
+    main { max-width: 720px; margin: auto; }
+    .map { position: relative; }
+    .map > img { border-radius: 24px; }
+    img { display: block; width: 100%; height: auto; }
+    .marker {
+      position: absolute;
+      left: var(--x);
+      top: var(--y);
+      transform: translate(-50%, -50%);
+      width: min(44px, 11%);
+      height: min(44px, 12.5%);
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+    .marker::before, .marker::after, .wave {
+      position: absolute;
+      inset: 0;
+      width: 50%;
+      height: 50%;
+      margin: auto;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .marker::before {
+      content: "";
+      background: #268bd8;
+      opacity: .49;
+    }
+    .marker::after, .wave {
+      content: "";
+      border: 1px solid #268bd8;
+      animation: marker-wave 2.8s ease-out infinite;
+    }
+    .wave { animation-delay: -1.4s; }
+    @keyframes marker-wave {
+      from { transform: scale(.85); opacity: .72; }
+      to { transform: scale(2.1); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .marker::after, .wave { display: none; }
+    }
+    button:focus-visible { outline: 3px solid #164b81; outline-offset: 2px; }
+    .label {
+      position: absolute;
+      z-index: 1;
+      top: max(32px, calc(var(--y) - 20px));
+      left: clamp(78px, var(--x), calc(100% - 78px));
+      width: max-content;
+      max-width: min(148px, 100%);
+      transform: translate(-50%, -100%);
+      padding: 4px 8px;
+      border: 1px solid #e2e8f0;
+      border-radius: 7px;
+      background: #fffffff5;
+      box-shadow: 0 2px 6px #1e293b26;
+      color: #1e293b;
+      text-align: center;
+      font-size: .8125rem;
+      font-weight: 600;
+      line-height: 1.25;
+      pointer-events: none;
+    }
+  </style>
+
+</head>
+<body>
+  <main>
+    <div class="map">
+      <img src="site-plan.png" width="1448" height="1086" alt="Общий план производственной площадки с четырьмя объектами">
+      <button class="marker" type="button" style="--x: 47%; --y: 53%" aria-label="Автокран" aria-pressed="false"><span class="wave" aria-hidden="true"></span></button>
+      <button class="marker" type="button" style="--x: 59%; --y: 29%" aria-label="Козловой кран" aria-pressed="false"><span class="wave" aria-hidden="true"></span></button>
+      <button class="marker" type="button" style="--x: 17%; --y: 30%" aria-label="Мазутохранилище" aria-pressed="false"><span class="wave" aria-hidden="true"></span></button>
+      <button class="marker" type="button" style="--x: 17%; --y: 72%" aria-label="Котельная" aria-pressed="false"><span class="wave" aria-hidden="true"></span></button>
+      <div class="label" aria-hidden="true" hidden></div>
+    </div>
+
+  </main>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.6/iframeResizer.contentWindow.min.js"></script>
+  <script>
+    const map = document.querySelector('.map');
+    const markers = [...map.querySelectorAll('.marker')];
+    const label = map.querySelector('.label');
+    let selected = null;
+    let hovered = null;
+
+    function showLabel(marker) {
+      label.hidden = !marker;
+      if (!marker) return;
+      label.textContent = marker.getAttribute('aria-label');
+      label.style.setProperty('--x', marker.style.getPropertyValue('--x'));
+      label.style.setProperty('--y', marker.style.getPropertyValue('--y'));
+    }
+
+    function selectMarker(marker) {
+      selected?.setAttribute('aria-pressed', 'false');
+      selected = selected === marker ? null : marker;
+      selected?.setAttribute('aria-pressed', 'true');
+      showLabel(hovered ?? selected);
+    }
+
+    for (const marker of markers) {
+      marker.addEventListener('pointerenter', (event) => {
+        if (event.pointerType !== 'mouse') return;
+        hovered = marker;
+        showLabel(hovered);
+      });
+      marker.addEventListener('pointerleave', () => {
+        if (hovered !== marker) return;
+        hovered = null;
+        showLabel(selected);
+      });
+      marker.addEventListener('focus', () => {
+        if (marker.matches(':focus-visible')) showLabel(marker);
+      });
+      marker.addEventListener('blur', () => showLabel(hovered ?? selected));
+      marker.addEventListener('click', () => {
+        if (!hovered) selectMarker(marker);
+      });
+    }
+
+    map.addEventListener('click', (event) => {
+      if (!event.target.closest('.marker')) selectMarker(null);
+    });
+    map.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      hovered = null;
+      selectMarker(null);
+    });
+  </script>
+</body>
+</html>
